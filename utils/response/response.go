@@ -1,6 +1,8 @@
 package response
 
 import (
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
@@ -18,9 +20,9 @@ type Bean struct {
 // Response 聚合应答
 func Response(r *http.Request, w http.ResponseWriter, resp interface{}, err error) {
 	if err != nil {
-		SuccessResponse(r, w, resp)
-	} else {
 		FailedResponse(r,w, resp, err)
+	} else {
+		SuccessResponse(r, w, resp)
 	}
 }
 
@@ -68,13 +70,27 @@ func FailedResponse(r *http.Request, w http.ResponseWriter, resp interface{}, er
 	default:
 		httpx.WriteJson(w, http.StatusBadRequest, failedBean)
 	}
-
 }
 
 // ValidateErrOrResponse 验证错误的应答
-func ValidateErrOrResponse(r *http.Request, w http.ResponseWriter, err error)  {
+func ValidateErrOrResponse(r *http.Request, w http.ResponseWriter, err error, trans ut.Translator) {
+	var msg string
+	var data interface{}
+	causeErr := errors.Cause(err)
+	if _, ok := causeErr.(validator.ValidationErrors); ok {
+		validateErrs := err.(validator.ValidationErrors)
+		for _, validateErr := range validateErrs {
+			msg = validateErr.Translate(trans)
+			break
+		}
+		data = validateErrs.Translate(trans)
+	} else {
+		msg = err.Error()
+	}
+
 	httpx.WriteJson(w, http.StatusUnprocessableEntity, &Bean{
 		Code:    xerr.ErrorValidation,
-		Message: err.Error(),
+		Message: msg,
+		Data: data,
 	})
 }
