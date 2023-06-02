@@ -72,8 +72,16 @@ func FailedResponse(r *http.Request, w http.ResponseWriter, resp interface{}, er
 	}
 }
 
-// ValidateErrOrResponse 验证错误的应答
-func ValidateErrOrResponse(r *http.Request, w http.ResponseWriter, err error, trans ut.Translator) {
+//ParseParamErrResponse 解析参数错误的应答
+func ParseParamErrResponse(r *http.Request, w http.ResponseWriter, err error) {
+	httpx.WriteJson(w, http.StatusUnprocessableEntity, &Bean{
+		Code:    xerr.ErrorValidation,
+		Message: err.Error(),
+	})
+}
+
+// ValidateErrResponse 验证错误的应答
+func ValidateErrResponse(r *http.Request, w http.ResponseWriter, err error, trans ut.Translator) {
 	var msg string
 	var data interface{}
 	causeErr := errors.Cause(err)
