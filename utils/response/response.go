@@ -56,11 +56,11 @@ func FailedResponse(r *http.Request, w http.ResponseWriter, resp interface{}, er
 				failedBean.Message = xerr.MapMsg(failedBean.Code)
 			}
 		} else {
-			//其他错误
+			//其他错误,不用设置failedBean
 		}
 	}
 
-	logx.WithContext(r.Context()).Errorf("【API-ERR】 : %+v ", err)
+	logx.WithContext(r.Context()).Errorf("[FailedResponse记录][API-ERR] : 原始错误：%+v 转换后:%+v", err, failedBean)
 
 	switch failedBean.Code {
 	case xerr.ErrorTokenExpire:
