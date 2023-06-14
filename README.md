@@ -27,7 +27,7 @@ go-zero示例微服务的基础库
 。。。
 
 ├── mqueue
-│   └── scheduler 8002
+│   └── scheduler 8001
 
 ```
 
@@ -156,4 +156,20 @@ func NewServiceContext(c {{.config}}) *ServiceContext {
 	}
 }
 
+```
+
+## 常用命令
+
+1. 生成api
+```shell
+goctl api go -api=cmd/api/desc/payment.api -dir=cmd/api/
+```
+
+2. 生成model
+```shell
+#使用ddl文件
+goctl model mysql ddl -src ./sql/mysql.sql -dir ./cmd/dao -cache
+
+#使用database
+goctl model mysql datasource -url="root:jiangxiong@(127.0.0.1:3306)/greet" -table greet_order_payment,greet_order_payment_notice -dir ./cmd/dao/model -cache
 ```
