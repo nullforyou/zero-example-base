@@ -5,11 +5,12 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	zh_translations "github.com/go-playground/validator/v10/translations/zh"
+	"reflect"
 )
 
 type Validator struct {
 	Validate *validator.Validate //验证器
-	Trans ut.Translator //翻译器
+	Trans    ut.Translator       //翻译器
 }
 
 // InitValidator 初始化验证器
@@ -19,10 +20,15 @@ func InitValidator() (val Validator) {
 	trans, _ := uni.GetTranslator("zh")
 	validate := validator.New()
 	zh_translations.RegisterDefaultTranslations(validate, trans)
+
+	//注册tag名称，作用是把验证里的comment返回为字段名称
+	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		return fld.Tag.Get("comment")
+	})
+
 	RegisterValidator(validate, trans) //注册自定义验证
 	return Validator{Validate: validate, Trans: trans}
 }
-
 
 // RegisterValidator 注册自定义验证
 func RegisterValidator(validate *validator.Validate, trans ut.Translator) {
